@@ -16,7 +16,7 @@ jobs:
           go-version: '^1.20.1' # The Go version to download (if necessary) and use.
       - run: go version
         name: Run Lint
-      - run: go get -u golang.org/x/lint/golint
+      - run: go install golang.org/x/lint/golint
       - run: golint ./...
         name: Run Tests
       - run: go test -v ./...

@@ -6,6 +6,6 @@ RUN go build -o /app/bin/ ./cmd/...
 FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /app/bin/ .
-COPY --from=builder /app/configs/ ./configs/
+#COPY --from=builder /app/configs/ ./configs/
 EXPOSE 3333 3334
 CMD ["./cmd"]

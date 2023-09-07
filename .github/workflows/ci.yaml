@@ -1,0 +1,22 @@
+# A GitHub workflow to automate tests in golang
+name: CI
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '^1.20.1' # The Go version to download (if necessary) and use.
+      - run: go version
+        name: Run Lint
+      - run: go get -u golang.org/x/lint/golint
+      - run: golint ./...
+        name: Run Tests
+      - run: go test -v ./...

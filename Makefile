@@ -13,4 +13,10 @@ run-tests: build
 run: build
 	@./bin/$(BINARY_NAME)
 
+run-databases:
+	@docker-compose up -d --remove-orphans
+
+stop-databases:
+	@docker-compose down
+
 .PHONY: clean build run-tests run

@@ -3,6 +3,7 @@ version: '3.8'
 volumes:
   postgres-data:
   mongodb-data:
+  redis-data:
 
 services:
   postgres:
@@ -30,18 +31,11 @@ services:
     volumes:
       - mongodb-data:/data/db
 
-  server:
-    build: .
-    image: quabynah1809/quantia-go-banking:latest
+  redis:
+    image: redis:latest
+    container_name: redis
     restart: always
     ports:
-      - "3333:3333"
-      - "3334:3334"
-    environment:
-      - MONGO_URI=mongodb://root:root@mongodb:27017
-      - POSTGRES_URI=postgresql://postgres:postgres@postgres:5432/postgres
-      - HTTP_PORT=3333
-      - GRPC_PORT=3334
-    depends_on:
-      - postgres
-      - mongodb
+      - "6379:6379"
+    volumes:
+      - redis-data:/data

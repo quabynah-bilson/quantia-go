@@ -1,4 +1,4 @@
-package auth
+package auth_test
 
 import (
 	"errors"
@@ -81,7 +81,7 @@ func TestAuthUseCase_RegisterUser(t *testing.T) {
 			}
 
 			tokenRepo := &mocks.MockTokenRepository{
-				GenerateTokenFn: func(username string) (string, error) {
+				GenerateTokenFn: func(claim string) (string, error) {
 					return getTestToken(), nil
 				},
 			}
@@ -156,7 +156,7 @@ func TestAuthUseCase_LoginUser(t *testing.T) {
 			}
 
 			tokenRepo := &mocks.MockTokenRepository{
-				GenerateTokenFn: func(username string) (string, error) {
+				GenerateTokenFn: func(claim string) (string, error) {
 					return getTestToken(), nil
 				},
 			}

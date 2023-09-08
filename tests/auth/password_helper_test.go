@@ -1,4 +1,4 @@
-package auth
+package auth_test
 
 import (
 	"errors"
@@ -18,10 +18,9 @@ func TestMockPasswordHelper_HashPassword(t *testing.T) {
 
 	testCases := []testCase{
 		{
-			name:          "hash a non-empty password",
-			password:      "password123",
-			expectedHash:  "hashedpassword123",
-			expectedError: nil,
+			name:         "hash a non-empty password",
+			password:     "password123",
+			expectedHash: "hashedpassword123",
 		},
 		{
 			name:          "try to hash an empty password",
@@ -59,7 +58,6 @@ func TestMockPasswordHelper_ComparePassword(t *testing.T) {
 			name:           "compare correct password",
 			hashedPassword: "hashedpassword123",
 			password:       "password123",
-			expectedError:  nil,
 		},
 		{
 			name:           "compare incorrect password",

@@ -24,7 +24,9 @@ func main() {
 
 	// create service (to be used in the route handler)
 	svc, err := internal.NewService(
-		internal.WithTokenRepo(token.NewRepository()),
+		internal.WithTokenRepo(token.NewRepository(
+			token.WithPasetoTokenizerHelper(),
+		)),
 	)
 	if err != nil {
 		log.Fatalf("error creating service: %v", err)

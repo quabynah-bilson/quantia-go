@@ -10,7 +10,7 @@ type RepositoryConfiguration func(*Repository) error
 // Repository is the token repository implementation
 type Repository struct {
 	token.Repository
-	// @todo -> add token generation helper here
+	generator token.TokenizerHelper
 }
 
 // NewRepository creates a new token repository
@@ -25,19 +25,16 @@ func NewRepository(configs ...RepositoryConfiguration) *Repository {
 }
 
 // GenerateToken generates a token for the given username.
-func (r *Repository) GenerateToken(username string) (string, error) {
-	// @todo -> generate token here
-	return "", nil
+func (r *Repository) GenerateToken(claim string) (string, error) {
+	return r.generator.GenerateToken(claim)
 }
 
 // ValidateToken validates the given token.
 func (r *Repository) ValidateToken(token string) error {
-	// @todo -> validate token here
-	return nil
+	return r.generator.ValidateToken(token)
 }
 
 // InvalidateToken invalidates the given token.
 func (r *Repository) InvalidateToken(token string) error {
-	// @todo -> invalidate token here
-	return nil
+	return r.generator.InvalidateToken(token)
 }

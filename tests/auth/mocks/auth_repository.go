@@ -22,14 +22,14 @@ var (
 	ErrAuthenticationFailed = errors.New("authentication failed. invalid username or password")
 )
 
-// MockAuthRepository is a mock of the account repository.
-type MockAuthRepository struct {
+// MockAccountRepository is a mock of the account repository.
+type MockAccountRepository struct {
 	LoginFn    func(username, password string) error
 	RegisterFn func(username, password string) error
 }
 
 // Login mocks the login method.
-func (m *MockAuthRepository) Login(username, password string) error {
+func (m *MockAccountRepository) Login(username, password string) error {
 	if username == NewCustomerUsername {
 		return ErrUserNotFound
 	}
@@ -42,7 +42,7 @@ func (m *MockAuthRepository) Login(username, password string) error {
 }
 
 // Register mocks the register method.
-func (m *MockAuthRepository) Register(username, password string) error {
+func (m *MockAccountRepository) Register(username, password string) error {
 	if username == ExistingCustomerUsername {
 		return ErrAlreadyExists
 	}

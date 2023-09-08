@@ -7,8 +7,8 @@ type ServiceConfiguration func(*Service) error
 
 // Service is the account service
 type Service struct {
-	AuthRepo  auth.Repository
-	TokenRepo auth.TokenRepository
+	AccountRepo auth.AccountRepository
+	TokenRepo   auth.TokenRepository
 }
 
 // NewService creates a new account service
@@ -25,9 +25,9 @@ func NewService(configs ...ServiceConfiguration) (*Service, error) {
 }
 
 // WithAuthRepo sets the account repository
-func WithAuthRepo(repo auth.Repository) ServiceConfiguration {
+func WithAuthRepo(repo auth.AccountRepository) ServiceConfiguration {
 	return func(s *Service) error {
-		s.AuthRepo = repo
+		s.AccountRepo = repo
 		return nil
 	}
 }

@@ -6,8 +6,8 @@ var (
 	// ErrTokenNotCreated is returned when the token could not be created.
 	ErrTokenNotCreated = errors.New("token not created")
 
-	// ErrParsingSession is returned when the session could not be parsed.
-	ErrParsingSession = errors.New("error parsing session")
+	//ErrParsingSession is returned when the session could not be parsed.
+	//ErrParsingSession = errors.New("error parsing session")
 
 	// ErrInvalidToken is returned when the token is invalid.
 	ErrInvalidToken = errors.New("invalid token")

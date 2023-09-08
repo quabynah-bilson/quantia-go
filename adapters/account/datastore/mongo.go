@@ -22,11 +22,12 @@ const (
 // MongoAccountDatabase is the struct that wraps the basic account database operations for MongoDB.
 type MongoAccountDatabase struct {
 	collection *mongo.Collection
+	pwHelper   auth.PasswordHelper
 	account.Database
 }
 
 // WithMongoAccountDatabase is the function that returns a DatabaseConfig function that sets the account database to MongoDB.
-func WithMongoAccountDatabase(connectionString string) adapters.DatabaseConfig {
+func WithMongoAccountDatabase(connectionString string, pwHelper auth.PasswordHelper) adapters.DatabaseConfig {
 	// set a timeout of 10 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -45,7 +46,10 @@ func WithMongoAccountDatabase(connectionString string) adapters.DatabaseConfig {
 	}
 
 	return func(a *adapters.DatabaseAdapter) error {
-		a.AccountDB = &MongoAccountDatabase{collection: db.Database(databaseName).Collection(collectionName)}
+		a.AccountDB = &MongoAccountDatabase{
+			collection: db.Database(databaseName).Collection(collectionName),
+			pwHelper:   pwHelper,
+		}
 		return nil
 	}
 }
@@ -80,12 +84,16 @@ func (db *MongoAccountDatabase) GetAccountByUsernameAndPassword(username, passwo
 
 	// find the account
 	var acc auth.Account
-	// @todo use a projection to only return the username and compare the password
-	if err := db.collection.FindOne(ctx, bson.M{"username": username, "password": password}).Decode(&acc); err != nil {
+	if err := db.collection.FindOne(ctx, bson.M{"username": username}).Decode(&acc); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, account.ErrAccountNotFound
 		}
 		return nil, err
+	}
+
+	// compare the passwords
+	if err := db.pwHelper.ComparePassword(acc.Password, password); err != nil {
+		return nil, account.ErrInvalidCredentials
 	}
 
 	return &acc, nil
@@ -97,7 +105,11 @@ func (db *MongoAccountDatabase) CreateAccount(username, password string) (*auth.
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// @todo -> hash the password before saving it to the database
+	// hash the password before saving it to the database
+	hashedPassword, err := db.pwHelper.HashPassword(password)
+	if err != nil {
+		return nil, account.ErrAccountNotCreated
+	}
 
 	// check if the account already exists
 	if count, err := db.collection.CountDocuments(ctx, bson.M{"username": username}); err != nil {
@@ -110,9 +122,9 @@ func (db *MongoAccountDatabase) CreateAccount(username, password string) (*auth.
 	userAccount := &auth.Account{
 		ID:       primitive.NewObjectID().Hex(),
 		Username: username,
-		Password: password,
+		Password: hashedPassword,
 	}
-	if _, err := db.collection.InsertOne(ctx, userAccount); err != nil {
+	if _, err = db.collection.InsertOne(ctx, userAccount); err != nil {
 		return nil, err
 	}
 

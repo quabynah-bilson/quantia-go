@@ -19,12 +19,12 @@ var (
 
 // UseCase is the account use case. It contains the necessary repositories to perform account operations
 type UseCase struct {
-	authRepo  Repository
+	authRepo  AccountRepository
 	tokenRepo TokenRepository
 }
 
 // NewUseCase creates a new account use case.
-func NewUseCase(authRepo Repository, tokenRepo TokenRepository) *UseCase {
+func NewUseCase(authRepo AccountRepository, tokenRepo TokenRepository) *UseCase {
 	return &UseCase{
 		authRepo:  authRepo,
 		tokenRepo: tokenRepo,

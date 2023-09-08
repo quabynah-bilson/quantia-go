@@ -14,12 +14,13 @@ import (
 
 // AccountPostgresDatabase is the struct that wraps the basic account database operations for PostgreSQL.
 type AccountPostgresDatabase struct {
+	conn     *pgx.Conn
+	pwHelper auth.PasswordHelper
 	account.Database
-	conn *pgx.Conn
 }
 
 // WithPostgresAccountDatabase is the function that returns a DatabaseConfig function that sets the account database to PostgreSQL.
-func WithPostgresAccountDatabase(connectionString string) adapters.DatabaseConfig {
+func WithPostgresAccountDatabase(connectionString string, pwHelper auth.PasswordHelper) adapters.DatabaseConfig {
 	// set a timeout of 5 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -46,7 +47,7 @@ func WithPostgresAccountDatabase(connectionString string) adapters.DatabaseConfi
 	}
 
 	return func(a *adapters.DatabaseAdapter) error {
-		a.AccountDB = &AccountPostgresDatabase{conn: conn}
+		a.AccountDB = &AccountPostgresDatabase{conn: conn, pwHelper: pwHelper}
 		return nil
 	}
 }
@@ -63,11 +64,16 @@ func (d *AccountPostgresDatabase) CreateAccount(username, password string) (*aut
 		return nil, account.ErrAccountAlreadyExists
 	}
 
-	// @todo -> hash the password
+	// hash the password
+	hashedPassword, err := d.pwHelper.HashPassword(password)
+	if err != nil {
+		log.Printf("error hashing password: %v", err)
+		return nil, account.ErrAccountNotCreated
+	}
 
 	// create a new account
 	id := uuid.New()
-	tag, err := d.conn.Exec(ctx, "INSERT INTO accounts (id, username, password) VALUES ($1, $2, $3)", id, username, password)
+	tag, err := d.conn.Exec(ctx, "INSERT INTO accounts (id, username, password) VALUES ($1, $2, $3)", id, username, hashedPassword)
 	if err != nil {
 		log.Printf("error creating account: %v", err)
 		return nil, account.ErrAccountNotCreated
@@ -118,13 +124,16 @@ func (d *AccountPostgresDatabase) GetAccountByUsernameAndPassword(username, pass
 
 	// get the account
 	var userAccount auth.Account
-	// @todo -> 1. remove password check from query
-	if err := d.conn.QueryRow(ctx, "SELECT id, username, password FROM accounts WHERE username = $1 AND password = $2", username, password).Scan(&userAccount.ID, &userAccount.Username, &userAccount.Password); err != nil {
+	if err := d.conn.QueryRow(ctx, "SELECT id, username, password FROM accounts WHERE username = $1", username).Scan(&userAccount.ID, &userAccount.Username, &userAccount.Password); err != nil {
 		log.Printf("error getting account: %v", err)
 		return nil, account.ErrAccountNotFound
 	}
 
-	// @todo -> 2. compare the password with the hashed password
+	// compare the password with the hashed password
+	if err := d.pwHelper.ComparePassword(userAccount.Password, password); err != nil {
+		log.Printf("error comparing password: %v", err)
+		return nil, account.ErrInvalidCredentials
+	}
 
 	return &userAccount, nil
 }

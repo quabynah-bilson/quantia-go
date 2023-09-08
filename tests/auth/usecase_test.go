@@ -64,7 +64,7 @@ func TestAuthUseCase_RegisterUser(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			authRepo := &mocks.MockAuthRepository{
+			authRepo := &mocks.MockAccountRepository{
 				RegisterFn: func(username, password string) error {
 					var err error
 
@@ -145,7 +145,7 @@ func TestAuthUseCase_LoginUser(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			authRepo := &mocks.MockAuthRepository{
+			authRepo := &mocks.MockAccountRepository{
 				LoginFn: func(username, password string) error {
 					// simulate a successful login
 					return nil

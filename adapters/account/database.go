@@ -20,6 +20,9 @@ var (
 
 	// ErrInvalidID is the error returned when an ID is invalid.
 	ErrInvalidID = errors.New("invalid ID. Please check and try again")
+
+	// ErrInvalidCredentials is the error returned when credentials are invalid.
+	ErrInvalidCredentials = errors.New("invalid credentials. Please check and try again")
 )
 
 // Database is the interface that wraps the basic account database operations.

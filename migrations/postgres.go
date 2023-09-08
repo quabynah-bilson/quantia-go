@@ -12,7 +12,8 @@ func PerformMigrations(conn *pgx.Conn, errChan chan error) {
 	defer cancel()
 
 	// create the database
-	_, _ = conn.Exec(ctx, "CREATE DATABASE quantia")
+	_, _ = conn.Exec(ctx, "CREATE DATABASE IF NOT EXISTS quantia")
+	_, _ = conn.Exec(ctx, "USE quantia")
 
 	// create the migrations table
 	_, _ = conn.Exec(ctx, "CREATE TABLE IF NOT EXISTS migrations (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)")

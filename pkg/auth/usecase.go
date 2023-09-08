@@ -17,13 +17,13 @@ var (
 	ErrInvalidToken = errors.New("invalid token. token must be a valid JWT token")
 )
 
-// UseCase is the auth use case. It contains the necessary repositories to perform auth operations
+// UseCase is the account use case. It contains the necessary repositories to perform account operations
 type UseCase struct {
 	authRepo  Repository
 	tokenRepo TokenRepository
 }
 
-// NewUseCase creates a new auth use case.
+// NewUseCase creates a new account use case.
 func NewUseCase(authRepo Repository, tokenRepo TokenRepository) *UseCase {
 	return &UseCase{
 		authRepo:  authRepo,

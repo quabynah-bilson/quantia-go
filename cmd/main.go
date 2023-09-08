@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/joho/godotenv"
 	"log"
 )
@@ -13,8 +12,5 @@ func main() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	fmt.Println("Config loaded successfully")
-
 	// @todo start server and initialize all components
-
 }

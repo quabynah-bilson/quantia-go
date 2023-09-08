@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/quabynah-bilson/quantia/adapters"
 	"github.com/quabynah-bilson/quantia/adapters/token"
-	"github.com/quabynah-bilson/quantia/pkg/auth"
+	"github.com/quabynah-bilson/quantia/pkg/account"
 	"log"
 	"time"
 )
@@ -48,7 +48,7 @@ func (db *RedisTokenDatabase) CreateToken(id string) (string, error) {
 	defer cancel()
 
 	// create a new token for the given id
-	session := auth.Session{
+	session := account.Session{
 		ID:        uuid.NewString(),
 		AccountID: id,
 		Token:     uuid.NewString(), // @todo generate a random token
@@ -100,7 +100,7 @@ func (db *RedisTokenDatabase) DeleteToken(accountID string) error {
 }
 
 // fromSession converts the given session to a JSON string.
-func fromSession(session *auth.Session) map[string]interface{} {
+func fromSession(session *account.Session) map[string]interface{} {
 	return map[string]interface{}{
 		"id":         session.ID,
 		"account_id": session.AccountID,

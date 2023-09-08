@@ -1,17 +1,18 @@
-package auth
+package account
 
 import (
-	"github.com/quabynah-bilson/quantia/pkg/auth"
+	"github.com/quabynah-bilson/quantia/pkg/account"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 )
 
 // PasswordHelper implements the PasswordHelper interface
 type PasswordHelper struct {
-	auth.PasswordHelper
+	account.PasswordHelper
 }
 
 // NewPasswordHelper creates a new password helper
-func NewPasswordHelper() auth.PasswordHelper {
+func NewPasswordHelper() account.PasswordHelper {
 	return &PasswordHelper{}
 }
 
@@ -20,7 +21,8 @@ func (p *PasswordHelper) HashPassword(password string) (string, error) {
 	pw := []byte(password)
 	result, err := bcrypt.GenerateFromPassword(pw, bcrypt.DefaultCost)
 	if err != nil {
-		return "", err
+		log.Printf("failed to hash password: %v", err)
+		return "", account.ErrInvalidPassword
 	}
 	return string(result), nil
 }
@@ -29,5 +31,9 @@ func (p *PasswordHelper) HashPassword(password string) (string, error) {
 func (p *PasswordHelper) ComparePassword(hashedPassword string, password string) error {
 	pw := []byte(password)
 	hw := []byte(hashedPassword)
-	return bcrypt.CompareHashAndPassword(hw, pw)
+	if err := bcrypt.CompareHashAndPassword(hw, pw); err != nil {
+		log.Printf("password mismatch: %v", err)
+		return account.ErrPasswordMismatch
+	}
+	return nil
 }

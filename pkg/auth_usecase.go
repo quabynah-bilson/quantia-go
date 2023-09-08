@@ -1,7 +1,9 @@
-package auth
+package pkg
 
 import (
 	"errors"
+	"github.com/quabynah-bilson/quantia/pkg/account"
+	"github.com/quabynah-bilson/quantia/pkg/token"
 	"log"
 	"regexp"
 )
@@ -19,12 +21,12 @@ var (
 
 // UseCase is the account use case. It contains the necessary repositories to perform account operations
 type UseCase struct {
-	authRepo  AccountRepository
-	tokenRepo TokenRepository
+	authRepo  account.Repository
+	tokenRepo token.Repository
 }
 
 // NewUseCase creates a new account use case.
-func NewUseCase(authRepo AccountRepository, tokenRepo TokenRepository) *UseCase {
+func NewUseCase(authRepo account.Repository, tokenRepo token.Repository) *UseCase {
 	return &UseCase{
 		authRepo:  authRepo,
 		tokenRepo: tokenRepo,
@@ -48,13 +50,13 @@ func (uc *UseCase) Register(username string, password string) (*string, error) {
 		return nil, err
 	}
 
-	token, err := uc.tokenRepo.GenerateToken(username)
+	generatedToken, err := uc.tokenRepo.GenerateToken(username)
 	if err != nil {
 		log.Printf("error generating token: %v", err)
 		return nil, err
 	}
 
-	return &token, nil
+	return &generatedToken, nil
 }
 
 // Login logs in a user.
@@ -74,13 +76,13 @@ func (uc *UseCase) Login(username string, password string) (*string, error) {
 		return nil, err
 	}
 
-	token, err := uc.tokenRepo.GenerateToken(username)
+	generatedToken, err := uc.tokenRepo.GenerateToken(username)
 	if err != nil {
 		log.Printf("error generating token: %v", err)
 		return nil, err
 	}
 
-	return &token, nil
+	return &generatedToken, nil
 }
 
 // Logout logs out a user.

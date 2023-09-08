@@ -1,14 +1,17 @@
-package auth
+package internal
 
-import "github.com/quabynah-bilson/quantia/pkg/auth"
+import (
+	"github.com/quabynah-bilson/quantia/pkg/account"
+	"github.com/quabynah-bilson/quantia/pkg/token"
+)
 
 // ServiceConfiguration is a function that configures a service
 type ServiceConfiguration func(*Service) error
 
 // Service is the account service
 type Service struct {
-	AccountRepo auth.AccountRepository
-	TokenRepo   auth.TokenRepository
+	AccountRepo account.Repository
+	TokenRepo   token.Repository
 }
 
 // NewService creates a new account service
@@ -25,7 +28,7 @@ func NewService(configs ...ServiceConfiguration) (*Service, error) {
 }
 
 // WithAuthRepo sets the account repository
-func WithAuthRepo(repo auth.AccountRepository) ServiceConfiguration {
+func WithAuthRepo(repo account.Repository) ServiceConfiguration {
 	return func(s *Service) error {
 		s.AccountRepo = repo
 		return nil
@@ -33,7 +36,7 @@ func WithAuthRepo(repo auth.AccountRepository) ServiceConfiguration {
 }
 
 // WithTokenRepo sets the token repository
-func WithTokenRepo(repo auth.TokenRepository) ServiceConfiguration {
+func WithTokenRepo(repo token.Repository) ServiceConfiguration {
 	return func(s *Service) error {
 		s.TokenRepo = repo
 		return nil

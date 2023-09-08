@@ -10,10 +10,13 @@ var (
 	ErrParsingSession = errors.New("error parsing session")
 
 	// ErrInvalidToken is returned when the token is invalid.
-	//ErrInvalidToken = errors.New("invalid token")
+	ErrInvalidToken = errors.New("invalid token")
+
+	// ErrCannotDeleteToken is returned when the token could not be deleted.
+	ErrCannotDeleteToken = errors.New("cannot delete token")
 
 	// ErrTokenExpired is returned when the token has expired.
-	ErrTokenExpired = errors.New("token expired")
+	//ErrTokenExpired = errors.New("token expired")
 )
 
 // Database is the interface that wraps the basic token database operations.
@@ -22,8 +25,8 @@ type Database interface {
 	CreateToken(id string) (string, error)
 
 	// ValidateToken validates the given token.
-	ValidateToken(authToken string) error
+	ValidateToken(authToken, accountID string) error
 
 	// DeleteToken invalidates the given token.
-	DeleteToken(authToken string) error
+	DeleteToken(accountID string) error
 }

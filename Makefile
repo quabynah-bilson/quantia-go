@@ -19,4 +19,4 @@ run-databases:
 stop-databases:
 	@docker-compose down
 
-.PHONY: clean build run-tests run
+.PHONY: clean build run-tests run run-databases stop-databases run-lints

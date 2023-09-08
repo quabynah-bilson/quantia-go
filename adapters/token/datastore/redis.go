@@ -2,8 +2,6 @@ package datastore
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/quabynah-bilson/quantia/adapters"
@@ -49,26 +47,6 @@ func (db *RedisTokenDatabase) CreateToken(id string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// check if the username exists
-	sessionJson, err := db.client.Get(ctx, id).Result()
-	if err != nil && !errors.Is(err, redis.Nil) {
-		log.Printf("error checking if username exists: %v", err)
-		return "", token.ErrTokenNotCreated
-	}
-
-	// check if the session exists
-	if sessionJson != "" {
-		// @todo -> check if the token has expired
-
-		// return the token if the session exists
-		var session auth.Session
-		if err = toSession(sessionJson, &session); err != nil {
-			return "", err
-		}
-
-		return session.Token, nil
-	}
-
 	// create a new token for the given id
 	session := auth.Session{
 		ID:        uuid.NewString(),
@@ -76,13 +54,7 @@ func (db *RedisTokenDatabase) CreateToken(id string) (string, error) {
 		Token:     uuid.NewString(), // @todo generate a random token
 	}
 
-	// convert the session to a JSON string
-	jsonString, err := fromSession(&session)
-	if err != nil {
-		return "", err
-	}
-
-	if err := db.client.Set(ctx, id, jsonString, 0).Err(); err != nil {
+	if err := db.client.HSet(ctx, id, fromSession(&session)).Err(); err != nil {
 		log.Printf("error creating token: %v", err)
 		return "", token.ErrTokenNotCreated
 	}
@@ -91,40 +63,47 @@ func (db *RedisTokenDatabase) CreateToken(id string) (string, error) {
 }
 
 // ValidateToken validates the given token.
-func (db *RedisTokenDatabase) ValidateToken(authToken string) error {
-	// @todo -> check if the token has expired
+func (db *RedisTokenDatabase) ValidateToken(authToken, accountID string) error {
+	// set context with timeout of 5 seconds
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	// @todo -> implement this method
+	storedToken, err := db.client.HGet(ctx, accountID, "token").Result()
+	if err != nil {
+		log.Printf("error validating token: %v", err)
+		return token.ErrInvalidToken
+	}
+
+	// check if the token is valid
+	if storedToken != authToken {
+		return token.ErrInvalidToken
+	}
+
+	// @todo -> check if the token has expired
 
 	return nil
 }
 
 // DeleteToken invalidates the given token.
-func (db *RedisTokenDatabase) DeleteToken(authToken string) error {
-	// @todo -> check if the token is valid
+func (db *RedisTokenDatabase) DeleteToken(accountID string) error {
+	// set context with timeout of 5 seconds
+	ctx, cancel := context.WithTimeout(context.Background(), 105*time.Second)
+	defer cancel()
 
-	// @todo -> implement this method
-
-	return nil
-}
-
-// toSession converts the given JSON string to a session.
-func toSession(jsonString string, session *auth.Session) error {
-	if err := json.Unmarshal([]byte(jsonString), &session); err != nil {
-		log.Printf("error unmarshalling session: %v", err)
-		return token.ErrParsingSession
+	// delete the token
+	if err := db.client.HDel(ctx, accountID, "token", "account_id", "id").Err(); err != nil {
+		log.Printf("error deleting token: %v", err)
+		return token.ErrCannotDeleteToken
 	}
 
 	return nil
 }
 
 // fromSession converts the given session to a JSON string.
-func fromSession(session *auth.Session) (string, error) {
-	jsonString, err := json.Marshal(session)
-	if err != nil {
-		log.Printf("error marshalling session: %v", err)
-		return "", token.ErrParsingSession
+func fromSession(session *auth.Session) map[string]interface{} {
+	return map[string]interface{}{
+		"id":         session.ID,
+		"account_id": session.AccountID,
+		"token":      session.Token,
 	}
-
-	return string(jsonString), nil
 }

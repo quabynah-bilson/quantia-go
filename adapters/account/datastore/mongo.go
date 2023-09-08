@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/quabynah-bilson/quantia/adapters"
 	"github.com/quabynah-bilson/quantia/adapters/account"
-	"github.com/quabynah-bilson/quantia/pkg/auth"
+	"github.com/quabynah-bilson/quantia/pkg/account"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -22,12 +22,12 @@ const (
 // MongoAccountDatabase is the struct that wraps the basic account database operations for MongoDB.
 type MongoAccountDatabase struct {
 	collection *mongo.Collection
-	pwHelper   auth.PasswordHelper
+	pwHelper   account.PasswordHelper
 	account.Database
 }
 
 // WithMongoAccountDatabase is the function that returns a DatabaseConfig function that sets the account database to MongoDB.
-func WithMongoAccountDatabase(connectionString string, pwHelper auth.PasswordHelper) adapters.DatabaseConfig {
+func WithMongoAccountDatabase(connectionString string, pwHelper account.PasswordHelper) adapters.DatabaseConfig {
 	// set a timeout of 10 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -55,7 +55,7 @@ func WithMongoAccountDatabase(connectionString string, pwHelper auth.PasswordHel
 }
 
 // GetAccount gets an account by ID.
-func (db *MongoAccountDatabase) GetAccount(id string) (*auth.Account, error) {
+func (db *MongoAccountDatabase) GetAccount(id string) (*account.Account, error) {
 	// set a timeout of 5 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -65,7 +65,7 @@ func (db *MongoAccountDatabase) GetAccount(id string) (*auth.Account, error) {
 	if err != nil {
 		return nil, account.ErrInvalidID
 	}
-	var acc auth.Account
+	var acc account.Account
 	if err = db.collection.FindOne(ctx, bson.M{"_id": oid}).Decode(&acc); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, account.ErrAccountNotFound
@@ -77,13 +77,13 @@ func (db *MongoAccountDatabase) GetAccount(id string) (*auth.Account, error) {
 }
 
 // GetAccountByUsernameAndPassword gets an account by username and password
-func (db *MongoAccountDatabase) GetAccountByUsernameAndPassword(username, password string) (*auth.Account, error) {
+func (db *MongoAccountDatabase) GetAccountByUsernameAndPassword(username, password string) (*account.Account, error) {
 	// set a timeout of 5 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	// find the account
-	var acc auth.Account
+	var acc account.Account
 	if err := db.collection.FindOne(ctx, bson.M{"username": username}).Decode(&acc); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, account.ErrAccountNotFound
@@ -100,7 +100,7 @@ func (db *MongoAccountDatabase) GetAccountByUsernameAndPassword(username, passwo
 }
 
 // CreateAccount creates a new account.
-func (db *MongoAccountDatabase) CreateAccount(username, password string) (*auth.Account, error) {
+func (db *MongoAccountDatabase) CreateAccount(username, password string) (*account.Account, error) {
 	// set a timeout of 5 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -119,7 +119,7 @@ func (db *MongoAccountDatabase) CreateAccount(username, password string) (*auth.
 	}
 
 	// create the account
-	userAccount := &auth.Account{
+	userAccount := &account.Account{
 		ID:       primitive.NewObjectID().Hex(),
 		Username: username,
 		Password: hashedPassword,

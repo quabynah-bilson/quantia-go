@@ -3,7 +3,7 @@ package auth
 import (
 	"errors"
 	"github.com/google/uuid"
-	pkg "github.com/quabynah-bilson/quantia/pkg/auth"
+	"github.com/quabynah-bilson/quantia/pkg"
 	"github.com/quabynah-bilson/quantia/tests/auth/mocks"
 	"testing"
 )
@@ -16,12 +16,14 @@ type testCase struct {
 	expectedErr   error
 }
 
+// getTestToken returns a test token.
 func getTestToken() string {
 	uuidToken, _ := uuid.Parse("123e4567-e89b-12d3-a456-426614174000")
 	token := uuidToken.String()
 	return token
 }
 
+// TestAuthUseCase_RegisterUser tests the register user method of the auth use case.
 func TestAuthUseCase_RegisterUser(t *testing.T) {
 	testCases := []testCase{
 		{
@@ -97,6 +99,7 @@ func TestAuthUseCase_RegisterUser(t *testing.T) {
 	}
 }
 
+// TestAuthUseCase_LoginUser tests the login user method of the auth use case.
 func TestAuthUseCase_LoginUser(t *testing.T) {
 	testCases := []testCase{
 		{
@@ -171,6 +174,7 @@ func TestAuthUseCase_LoginUser(t *testing.T) {
 	}
 }
 
+// TestAuthUseCase_LogoutUser tests the logout user method of the auth use case.
 func TestAuthUseCase_LogoutUser(t *testing.T) {
 	testCases := []testCase{
 		{

@@ -7,7 +7,7 @@ import (
 	"github.com/quabynah-bilson/quantia/adapters"
 	"github.com/quabynah-bilson/quantia/adapters/account"
 	"github.com/quabynah-bilson/quantia/migrations"
-	"github.com/quabynah-bilson/quantia/pkg/auth"
+	"github.com/quabynah-bilson/quantia/pkg/account"
 	"log"
 	"time"
 )
@@ -15,12 +15,12 @@ import (
 // AccountPostgresDatabase is the struct that wraps the basic account database operations for PostgreSQL.
 type AccountPostgresDatabase struct {
 	conn     *pgx.Conn
-	pwHelper auth.PasswordHelper
+	pwHelper account.PasswordHelper
 	account.Database
 }
 
 // WithPostgresAccountDatabase is the function that returns a DatabaseConfig function that sets the account database to PostgreSQL.
-func WithPostgresAccountDatabase(connectionString string, pwHelper auth.PasswordHelper) adapters.DatabaseConfig {
+func WithPostgresAccountDatabase(connectionString string, pwHelper account.PasswordHelper) adapters.DatabaseConfig {
 	// set a timeout of 5 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -53,13 +53,13 @@ func WithPostgresAccountDatabase(connectionString string, pwHelper auth.Password
 }
 
 // CreateAccount creates a new account.
-func (d *AccountPostgresDatabase) CreateAccount(username, password string) (*auth.Account, error) {
+func (d *AccountPostgresDatabase) CreateAccount(username, password string) (*account.Account, error) {
 	// set a timeout of 5 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	// check if the account already exists by username
-	var userAccount auth.Account
+	var userAccount account.Account
 	if err := d.conn.QueryRow(ctx, "SELECT id, username, password FROM accounts WHERE username = $1", username).Scan(&userAccount.ID, &userAccount.Username, &userAccount.Password); err == nil {
 		return nil, account.ErrAccountAlreadyExists
 	}
@@ -95,7 +95,7 @@ func (d *AccountPostgresDatabase) CreateAccount(username, password string) (*aut
 }
 
 // GetAccount gets an account by ID.
-func (d *AccountPostgresDatabase) GetAccount(id string) (*auth.Account, error) {
+func (d *AccountPostgresDatabase) GetAccount(id string) (*account.Account, error) {
 	// set a timeout of 5 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -107,7 +107,7 @@ func (d *AccountPostgresDatabase) GetAccount(id string) (*auth.Account, error) {
 	}
 
 	// get the account
-	var userAccount auth.Account
+	var userAccount account.Account
 	if err := d.conn.QueryRow(ctx, "SELECT id, username, password FROM accounts WHERE id = $1", parsedID).Scan(&userAccount.ID, &userAccount.Username, &userAccount.Password); err != nil {
 		log.Printf("error getting account: %v", err)
 		return nil, account.ErrAccountNotFound
@@ -117,13 +117,13 @@ func (d *AccountPostgresDatabase) GetAccount(id string) (*auth.Account, error) {
 }
 
 // GetAccountByUsernameAndPassword gets an account by username and password.
-func (d *AccountPostgresDatabase) GetAccountByUsernameAndPassword(username, password string) (*auth.Account, error) {
+func (d *AccountPostgresDatabase) GetAccountByUsernameAndPassword(username, password string) (*account.Account, error) {
 	// set a timeout of 5 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	// get the account
-	var userAccount auth.Account
+	var userAccount account.Account
 	if err := d.conn.QueryRow(ctx, "SELECT id, username, password FROM accounts WHERE username = $1", username).Scan(&userAccount.ID, &userAccount.Username, &userAccount.Password); err != nil {
 		log.Printf("error getting account: %v", err)
 		return nil, account.ErrAccountNotFound

@@ -1,13 +1,11 @@
 package main
 
 import (
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
-	"github.com/quabynah-bilson/quantia/adapters"
-	ads "github.com/quabynah-bilson/quantia/adapters/account/datastore"
-	tds "github.com/quabynah-bilson/quantia/adapters/token/datastore"
-	"github.com/quabynah-bilson/quantia/internal/auth"
+	"github.com/quabynah-bilson/quantia/internal"
+	"github.com/quabynah-bilson/quantia/internal/token"
 	"log"
-	"os"
 )
 
 // entry point of the application
@@ -18,21 +16,36 @@ func main() {
 	}
 
 	// @todo start server and initialize all components
-	pwHelper := auth.NewPasswordHelper()
-	adpt := adapters.NewAdapter(
-		ads.WithPostgresAccountDatabase(os.Getenv("POSTGRES_URI"), pwHelper),
-		tds.WithRedisTokenDatabase(os.Getenv("REDIS_URI")),
+	//pwHelper := account.NewPasswordHelper()
+	//_ = adapters.NewAdapter(
+	//	ads.WithPostgresAccountDatabase(os.Getenv("POSTGRES_URI"), pwHelper),
+	//	tds.WithRedisTokenDatabase(os.Getenv("REDIS_URI")),
+	//)
+
+	// create service (to be used in the route handler)
+	svc, err := internal.NewService(
+		internal.WithTokenRepo(token.NewRepository()),
 	)
-
-	account, err := adpt.AccountDB.GetAccountByUsernameAndPassword("quabynah@gmail.com", "password")
 	if err != nil {
-		log.Fatalf("error creating account: %v", err)
+		log.Fatalf("error creating service: %v", err)
 	}
 
-	token, err := adpt.TokenDB.CreateToken(account.ID)
+	// generate token
+	generateToken, err := svc.TokenRepo.GenerateToken(uuid.NewString())
 	if err != nil {
-		log.Fatalf("error creating token: %v", err)
+		log.Fatalf("error generating token: %v", err)
 	}
+	log.Printf("token: %s", generateToken)
 
-	log.Printf("account: %+v & token: %s", account, token)
+	//account, err := adpt.AccountDB.GetAccountByUsernameAndPassword("quabynah@gmail.com", "password")
+	//if err != nil {
+	//	log.Fatalf("error creating account: %v", err)
+	//}
+
+	//token, err := adpt.TokenDB.CreateToken(account.ID)
+	//if err != nil {
+	//	log.Fatalf("error creating token: %v", err)
+	//}
+
+	//log.Printf("account: %+v & token: %s", account, token)
 }

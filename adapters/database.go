@@ -1,38 +1,28 @@
 package adapters
 
-import "log"
+import (
+	"github.com/quabynah-bilson/quantia/adapters/account"
+	"github.com/quabynah-bilson/quantia/adapters/token"
+	"log"
+)
 
-// AppDatabaseConfig is the type of the function that configures the database.
-type AppDatabaseConfig func(*Database) error
+// DatabaseConfig is the type of the function that configures the account database.
+type DatabaseConfig func(*DatabaseAdapter) error
 
-// AppDatabase is the interface that wraps the basic database operations.
-type AppDatabase interface {
-
-	// Get retrieves a record from the database.
-	Get(key string, data interface{}) error
-
-	// Set saves a record into the database.
-	Set(key string, value interface{}) (*string, error)
-
-	// Delete removes a record from the database.
-	Delete(key string) error
+// DatabaseAdapter is the type that provides access to the various database operations.
+type DatabaseAdapter struct {
+	AccountDB account.Database
+	TokenDB   token.Database
 }
 
-// Database is the struct that holds the database instance (MongoDB, Redis, etc.).
-// DB must implement the AppDatabase interface.
-type Database struct {
-	DB AppDatabase
-}
-
-// NewDatabase creates a new database instance based on the provided configs.
-func NewDatabase(configs ...AppDatabaseConfig) *Database {
-	database := &Database{}
+// NewAdapter creates a new database adapter instance based on the provided configs.
+func NewAdapter(configs ...DatabaseConfig) *DatabaseAdapter {
+	database := &DatabaseAdapter{}
 	for _, config := range configs {
 		if err := config(database); err != nil {
 			log.Printf("error configuring database: %v", err)
 			return nil
 		}
 	}
-	log.Printf("database configured successfully -> %T", database.DB)
 	return database
 }

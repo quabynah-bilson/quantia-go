@@ -5,13 +5,13 @@ import "github.com/quabynah-bilson/quantia/pkg/auth"
 // ServiceConfiguration is a function that configures a service
 type ServiceConfiguration func(*Service) error
 
-// Service is the auth service
+// Service is the account service
 type Service struct {
 	AuthRepo  auth.Repository
 	TokenRepo auth.TokenRepository
 }
 
-// NewService creates a new auth service
+// NewService creates a new account service
 func NewService(configs ...ServiceConfiguration) (*Service, error) {
 	s := &Service{}
 
@@ -24,7 +24,7 @@ func NewService(configs ...ServiceConfiguration) (*Service, error) {
 	return s, nil
 }
 
-// WithAuthRepo sets the auth repository
+// WithAuthRepo sets the account repository
 func WithAuthRepo(repo auth.Repository) ServiceConfiguration {
 	return func(s *Service) error {
 		s.AuthRepo = repo

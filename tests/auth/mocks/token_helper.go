@@ -5,7 +5,10 @@ import (
 )
 
 const (
-	SuggestedToken   = "token123"
+	// SuggestedToken is the suggested token for testing.
+	SuggestedToken = "token123"
+
+	// InvalidatedToken is the invalidated token for testing.
 	InvalidatedToken = "token456"
 )
 
@@ -29,19 +32,9 @@ func (m *MockTokenizerHelper) GenerateToken(claim string) (string, error) {
 }
 
 // ValidateToken validates the given token.
-func (m *MockTokenizerHelper) ValidateToken(suggestedToken string) error {
-	if !m.tokens[suggestedToken] {
+func (m *MockTokenizerHelper) ValidateToken(rawToken string) error {
+	if !m.tokens[rawToken] {
 		return token.ErrInvalidToken
 	}
-	return nil
-}
-
-// InvalidateToken invalidates the given token.
-func (m *MockTokenizerHelper) InvalidateToken(suggestedToken string) error {
-	if !m.tokens[suggestedToken] {
-		return token.ErrTokenRevoked
-	}
-
-	delete(m.tokens, suggestedToken)
 	return nil
 }

@@ -19,22 +19,22 @@ var (
 	ErrInvalidToken = errors.New("invalid token. token must be a valid JWT token")
 )
 
-// UseCase is the account use case. It contains the necessary repositories to perform account operations
-type UseCase struct {
-	authRepo  account.Repository
-	tokenRepo token.Repository
+// AuthUseCase is the auth use case. It contains the necessary repositories to perform auth operations.
+type AuthUseCase struct {
+	accountRepo account.Repository
+	tokenRepo   token.Repository
 }
 
-// NewUseCase creates a new account use case.
-func NewUseCase(authRepo account.Repository, tokenRepo token.Repository) *UseCase {
-	return &UseCase{
-		authRepo:  authRepo,
-		tokenRepo: tokenRepo,
+// NewAuthUseCase creates a new account use case.
+func NewAuthUseCase(authRepo account.Repository, tokenRepo token.Repository) *AuthUseCase {
+	return &AuthUseCase{
+		accountRepo: authRepo,
+		tokenRepo:   tokenRepo,
 	}
 }
 
 // Register registers a new user.
-func (uc *UseCase) Register(username string, password string) (*string, error) {
+func (uc *AuthUseCase) Register(username string, password string) (*string, error) {
 	if err := validateUsername(username); err != nil {
 		log.Printf("error validating username: %v", err)
 		return nil, err
@@ -45,12 +45,13 @@ func (uc *UseCase) Register(username string, password string) (*string, error) {
 		return nil, err
 	}
 
-	if err := uc.authRepo.Register(username, password); err != nil {
+	userAccount, err := uc.accountRepo.Register(username, password)
+	if err != nil {
 		log.Printf("error registering user: %v", err)
 		return nil, err
 	}
 
-	generatedToken, err := uc.tokenRepo.GenerateToken(username)
+	generatedToken, err := uc.tokenRepo.GenerateToken(userAccount.ID)
 	if err != nil {
 		log.Printf("error generating token: %v", err)
 		return nil, err
@@ -60,7 +61,7 @@ func (uc *UseCase) Register(username string, password string) (*string, error) {
 }
 
 // Login logs in a user.
-func (uc *UseCase) Login(username string, password string) (*string, error) {
+func (uc *AuthUseCase) Login(username string, password string) (*string, error) {
 	if err := validateUsername(username); err != nil {
 		log.Printf("error validating username: %v", err)
 		return nil, err
@@ -71,12 +72,13 @@ func (uc *UseCase) Login(username string, password string) (*string, error) {
 		return nil, err
 	}
 
-	if err := uc.authRepo.Login(username, password); err != nil {
+	userAccount, err := uc.accountRepo.Login(username, password)
+	if err != nil {
 		log.Printf("error logging in user: %v", err)
 		return nil, err
 	}
 
-	generatedToken, err := uc.tokenRepo.GenerateToken(username)
+	generatedToken, err := uc.tokenRepo.GenerateToken(userAccount.ID)
 	if err != nil {
 		log.Printf("error generating token: %v", err)
 		return nil, err
@@ -86,8 +88,8 @@ func (uc *UseCase) Login(username string, password string) (*string, error) {
 }
 
 // Logout logs out a user.
-func (uc *UseCase) Logout(token string) error {
-	if err := uc.tokenRepo.InvalidateToken(token); err != nil {
+func (uc *AuthUseCase) Logout(rawToken, accountID string) error {
+	if err := uc.tokenRepo.InvalidateToken(rawToken, accountID); err != nil {
 		log.Printf("error invalidating token: %v", err)
 		return ErrInvalidToken
 	}
@@ -96,8 +98,8 @@ func (uc *UseCase) Logout(token string) error {
 }
 
 // ValidateToken validates the given token.
-func (uc *UseCase) ValidateToken(token string) error {
-	if err := uc.tokenRepo.ValidateToken(token); err != nil {
+func (uc *AuthUseCase) ValidateToken(rawToken, accountID string) error {
+	if err := uc.tokenRepo.ValidateToken(rawToken, accountID); err != nil {
 		log.Printf("error validating token: %v", err)
 		return ErrInvalidToken
 	}

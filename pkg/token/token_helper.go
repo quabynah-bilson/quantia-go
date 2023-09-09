@@ -10,10 +10,7 @@ var (
 	ErrInvalidToken = errors.New("invalid token")
 
 	// ErrTokenExpired is the error returned when an expired token is provided.
-	//ErrTokenExpired = errors.New("token expired")
-
-	// ErrTokenRevoked is the error returned when a revoked token is provided.
-	ErrTokenRevoked = errors.New("token revoked")
+	ErrTokenExpired = errors.New("token expired")
 )
 
 // TokenizerHelper is the interface that wraps the basic token methods.
@@ -22,8 +19,5 @@ type TokenizerHelper interface {
 	GenerateToken(claim string) (string, error)
 
 	// ValidateToken validates the given token.
-	ValidateToken(token string) error
-
-	// InvalidateToken invalidates the given token.
-	InvalidateToken(token string) error
+	ValidateToken(rawToken string) error
 }

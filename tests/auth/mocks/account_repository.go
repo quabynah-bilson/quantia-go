@@ -1,6 +1,9 @@
 package mocks
 
-import "errors"
+import (
+	"errors"
+	"github.com/quabynah-bilson/quantia/pkg/account"
+)
 
 var (
 	//ExistingCustomerUsername is a user that already exists.
@@ -24,27 +27,27 @@ var (
 
 // MockAccountRepository is a mock of the account repository.
 type MockAccountRepository struct {
-	LoginFn    func(username, password string) error
-	RegisterFn func(username, password string) error
+	LoginFn    func(username, password string) (*account.Account, error)
+	RegisterFn func(username, password string) (*account.Account, error)
 }
 
 // Login mocks the login method.
-func (m *MockAccountRepository) Login(username, password string) error {
+func (m *MockAccountRepository) Login(username, password string) (*account.Account, error) {
 	if username == NewCustomerUsername {
-		return ErrUserNotFound
+		return nil, ErrUserNotFound
 	}
 
 	if password != ValidPassword {
-		return ErrAuthenticationFailed
+		return nil, ErrAuthenticationFailed
 	}
 
 	return m.LoginFn(username, password)
 }
 
 // Register mocks the register method.
-func (m *MockAccountRepository) Register(username, password string) error {
+func (m *MockAccountRepository) Register(username, password string) (*account.Account, error) {
 	if username == ExistingCustomerUsername {
-		return ErrAlreadyExists
+		return nil, ErrAlreadyExists
 	}
 
 	return m.RegisterFn(username, password)

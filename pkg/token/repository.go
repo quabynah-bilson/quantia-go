@@ -6,8 +6,8 @@ type Repository interface {
 	GenerateToken(claim string) (string, error)
 
 	// ValidateToken validates the given token.
-	ValidateToken(token string) error
+	ValidateToken(rawToken, accountID string) error
 
 	// InvalidateToken invalidates the given token.
-	InvalidateToken(token string) error
+	InvalidateToken(rawToken, accountID string) error
 }

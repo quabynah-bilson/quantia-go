@@ -3,8 +3,8 @@ package datastore
 import (
 	"context"
 	"errors"
-	"github.com/quabynah-bilson/quantia/adapters"
 	"github.com/quabynah-bilson/quantia/adapters/account"
+	internal "github.com/quabynah-bilson/quantia/internal/account"
 	pkgAccount "github.com/quabynah-bilson/quantia/pkg/account"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -26,8 +26,8 @@ type MongoAccountDatabase struct {
 	account.Database
 }
 
-// WithMongoAccountDatabase is the function that returns a DatabaseConfig function that sets the account database to MongoDB.
-func WithMongoAccountDatabase(connectionString string, pwHelper pkgAccount.PasswordHelper) adapters.DatabaseConfig {
+// WithMongoAccountDatabase creates a new RepositoryConfiguration for MongoDB.
+func WithMongoAccountDatabase(connectionString string, pwHelper pkgAccount.PasswordHelper) internal.RepositoryConfiguration {
 	// set a timeout of 10 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -45,11 +45,12 @@ func WithMongoAccountDatabase(connectionString string, pwHelper pkgAccount.Passw
 		return nil
 	}
 
-	return func(a *adapters.DatabaseAdapter) error {
-		a.AccountDB = &MongoAccountDatabase{
+	return func(r *internal.Repository) error {
+		r.DB = &MongoAccountDatabase{
 			collection: db.Database(databaseName).Collection(collectionName),
 			pwHelper:   pwHelper,
 		}
+
 		return nil
 	}
 }

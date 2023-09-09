@@ -4,16 +4,18 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/quabynah-bilson/quantia/pkg"
+	"github.com/quabynah-bilson/quantia/pkg/account"
 	"github.com/quabynah-bilson/quantia/tests/auth/mocks"
 	"testing"
 )
 
 type testCase struct {
-	name          string
-	username      string
-	password      string
-	expectedToken string
-	expectedErr   error
+	name              string
+	username          string
+	password          string
+	expectedToken     string
+	expectedAccountID string
+	expectedErr       error
 }
 
 // getTestToken returns a test token.
@@ -57,26 +59,29 @@ func TestAuthUseCase_RegisterUser(t *testing.T) {
 			expectedErr: mocks.ErrAlreadyExists,
 		},
 		{
-			name:          "valid registration",
-			username:      mocks.NewCustomerUsername,
-			password:      mocks.ValidPassword,
-			expectedToken: getTestToken(),
+			name:              "valid registration",
+			username:          mocks.NewCustomerUsername,
+			password:          mocks.ValidPassword,
+			expectedToken:     getTestToken(),
+			expectedAccountID: uuid.NewString(),
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			authRepo := &mocks.MockAccountRepository{
-				RegisterFn: func(username, password string) error {
+				RegisterFn: func(username, password string) (*account.Account, error) {
 					var err error
 
 					// simulate a user already exists
-					if username == "bilson@quantia.com" {
+					if username == mocks.ExistingCustomerUsername {
 						err = mocks.ErrAlreadyExists
 					}
 
 					// simulate a successful registration
-					return err
+					return &account.Account{
+						ID: tc.expectedAccountID,
+					}, err
 				},
 			}
 
@@ -86,7 +91,7 @@ func TestAuthUseCase_RegisterUser(t *testing.T) {
 				},
 			}
 
-			uc := pkg.NewUseCase(authRepo, tokenRepo)
+			uc := pkg.NewAuthUseCase(authRepo, tokenRepo)
 			token, err := uc.Register(tc.username, tc.password)
 			if !errors.Is(err, tc.expectedErr) {
 				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
@@ -149,9 +154,17 @@ func TestAuthUseCase_LoginUser(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			authRepo := &mocks.MockAccountRepository{
-				LoginFn: func(username, password string) error {
+				LoginFn: func(username, password string) (*account.Account, error) {
+					var err error
+					// simulate a user not found
+					if username == mocks.NewCustomerUsername {
+						err = mocks.ErrUserNotFound
+					}
+
 					// simulate a successful login
-					return nil
+					return &account.Account{
+						ID: tc.expectedAccountID,
+					}, err
 				},
 			}
 
@@ -161,7 +174,7 @@ func TestAuthUseCase_LoginUser(t *testing.T) {
 				},
 			}
 
-			uc := pkg.NewUseCase(authRepo, tokenRepo)
+			uc := pkg.NewAuthUseCase(authRepo, tokenRepo)
 			token, err := uc.Login(tc.username, tc.password)
 			if !errors.Is(err, tc.expectedErr) {
 				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
@@ -178,31 +191,69 @@ func TestAuthUseCase_LoginUser(t *testing.T) {
 func TestAuthUseCase_LogoutUser(t *testing.T) {
 	testCases := []testCase{
 		{
-			name:          "valid token",
-			expectedToken: getTestToken(),
-			expectedErr:   nil,
+			name:              "valid token",
+			expectedToken:     getTestToken(),
+			expectedAccountID: uuid.NewString(),
+			expectedErr:       nil,
 		},
 		{
-			name:          "invalid token",
-			expectedToken: "",
-			expectedErr:   pkg.ErrInvalidToken,
+			name:              "invalid token",
+			expectedToken:     "",
+			expectedAccountID: uuid.NewString(),
+			expectedErr:       pkg.ErrInvalidToken,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			tokenRepo := &mocks.MockTokenRepository{
-				InvalidateTokenFn: func(token string) error {
+				InvalidateTokenFn: func(rawToken, accountID string) error {
 					var err error
-					if token == "" {
+					if rawToken == "" {
 						err = pkg.ErrInvalidToken
 					}
 					return err
 				},
 			}
 
-			uc := pkg.NewUseCase(nil, tokenRepo)
-			err := uc.Logout(tc.expectedToken)
+			uc := pkg.NewAuthUseCase(nil, tokenRepo)
+			err := uc.Logout(tc.expectedToken, tc.expectedAccountID)
+			if !errors.Is(err, tc.expectedErr) {
+				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
+			}
+		})
+	}
+}
+
+// TestAuthUseCase_ValidateToken tests the validate token method of the auth use case.
+func TestAuthUseCase_ValidateToken(t *testing.T) {
+	testCases := []testCase{
+		{
+			name:              "valid token",
+			expectedToken:     getTestToken(),
+			expectedAccountID: uuid.NewString(),
+			expectedErr:       nil,
+		},
+		{
+			name:        "invalid token",
+			expectedErr: pkg.ErrInvalidToken,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tokenRepo := &mocks.MockTokenRepository{
+				ValidateTokenFn: func(rawToken, accountID string) error {
+					var err error
+					if rawToken == "" {
+						err = pkg.ErrInvalidToken
+					}
+					return err
+				},
+			}
+
+			uc := pkg.NewAuthUseCase(nil, tokenRepo)
+			err := uc.ValidateToken(tc.expectedToken, tc.expectedAccountID)
 			if !errors.Is(err, tc.expectedErr) {
 				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
 			}

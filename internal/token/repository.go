@@ -1,6 +1,7 @@
 package token
 
 import (
+	adapterToken "github.com/quabynah-bilson/quantia/adapters/token"
 	"github.com/quabynah-bilson/quantia/pkg/token"
 )
 
@@ -9,8 +10,8 @@ type RepositoryConfiguration func(*Repository) error
 
 // Repository is the token repository implementation
 type Repository struct {
+	DB adapterToken.Database
 	token.Repository
-	generator token.TokenizerHelper
 }
 
 // NewRepository creates a new token repository
@@ -26,15 +27,15 @@ func NewRepository(configs ...RepositoryConfiguration) *Repository {
 
 // GenerateToken generates a token for the given username.
 func (r *Repository) GenerateToken(claim string) (string, error) {
-	return r.generator.GenerateToken(claim)
+	return r.DB.CreateToken(claim)
 }
 
 // ValidateToken validates the given token.
-func (r *Repository) ValidateToken(token string) error {
-	return r.generator.ValidateToken(token)
+func (r *Repository) ValidateToken(rawToken, accountID string) error {
+	return r.DB.ValidateToken(rawToken, accountID)
 }
 
-// InvalidateToken invalidates the given token.
-func (r *Repository) InvalidateToken(token string) error {
-	return r.generator.InvalidateToken(token)
+// InvalidateToken invalidates the given account's ID
+func (r *Repository) InvalidateToken(_, accountID string) error {
+	return r.DB.DeleteToken(accountID)
 }

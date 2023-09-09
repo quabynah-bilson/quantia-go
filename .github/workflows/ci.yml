@@ -4,7 +4,7 @@ on:
   push:
     branches: [ dev ]
   pull_request:
-    branches: [ dev ]
+    branches: [ dev, "quabynah-bilson-patch-*" ]
 
 jobs:
   lint-and-test:
@@ -21,7 +21,7 @@ jobs:
         name: Run Tests
       - run: go test -v -cover ./...
         name: Code Coverage Summary Report
-        uses: irongut/CodeCoverageSummary@v1.3.0
+      - uses: irongut/CodeCoverageSummary@v1.3.0
         with:
           filename: coverage/**/coverage.cobertura.xml
           badge: true

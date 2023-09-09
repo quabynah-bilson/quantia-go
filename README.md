@@ -5,7 +5,8 @@
 ## Introduction
 
 Quantia is a robust backend architecture for a banking application, designed to automate and streamline banking operations. It is developed using the
-Go programming language, specifically version 1.21, along with Go SDK 1.21.1.
+Go programming language, specifically version 1.21, along with Go SDK 1.21.1. This is a dummy project created to showcase the use of Clean Architecture in Go
+to build a modularized backend application.
 
 ## Features
 

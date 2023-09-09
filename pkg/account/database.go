@@ -2,7 +2,6 @@ package account
 
 import (
 	"errors"
-	"github.com/quabynah-bilson/quantia/pkg/account"
 )
 
 var (
@@ -28,13 +27,13 @@ var (
 // Database is the interface that wraps the basic account database operations.
 type Database interface {
 	// GetAccount gets an account by ID
-	GetAccount(id string) (*account.Account, error)
+	GetAccount(id string) (*Account, error)
 
 	// GetAccountByUsernameAndPassword gets an account by username and password
-	GetAccountByUsernameAndPassword(username, password string) (*account.Account, error)
+	GetAccountByUsernameAndPassword(username, password string) (*Account, error)
 
 	// CreateAccount creates a new account
-	CreateAccount(username, password string) (*account.Account, error)
+	CreateAccount(username, password string) (*Account, error)
 
 	// DeleteAccount deletes an account by ID
 	DeleteAccount(id string) error

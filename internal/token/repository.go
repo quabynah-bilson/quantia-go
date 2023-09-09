@@ -1,7 +1,6 @@
 package token
 
 import (
-	adapterToken "github.com/quabynah-bilson/quantia/adapters/token"
 	"github.com/quabynah-bilson/quantia/pkg/token"
 )
 
@@ -10,7 +9,7 @@ type RepositoryConfiguration func(*Repository) error
 
 // Repository is the token repository implementation
 type Repository struct {
-	DB adapterToken.Database
+	DB token.Database
 	token.Repository
 }
 

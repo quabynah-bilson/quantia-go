@@ -3,7 +3,6 @@ package datastore
 import (
 	"context"
 	"errors"
-	"github.com/quabynah-bilson/quantia/adapters/account"
 	internal "github.com/quabynah-bilson/quantia/internal/account"
 	pkgAccount "github.com/quabynah-bilson/quantia/pkg/account"
 	"go.mongodb.org/mongo-driver/bson"
@@ -23,7 +22,7 @@ const (
 type MongoAccountDatabase struct {
 	collection *mongo.Collection
 	pwHelper   pkgAccount.PasswordHelper
-	account.Database
+	pkgAccount.Database
 }
 
 // WithMongoAccountDatabase creates a new RepositoryConfiguration for MongoDB.
@@ -64,12 +63,12 @@ func (db *MongoAccountDatabase) GetAccount(id string) (*pkgAccount.Account, erro
 	// find the account
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, account.ErrInvalidID
+		return nil, pkgAccount.ErrInvalidID
 	}
 	var acc pkgAccount.Account
 	if err = db.collection.FindOne(ctx, bson.M{"_id": oid}).Decode(&acc); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, account.ErrAccountNotFound
+			return nil, pkgAccount.ErrAccountNotFound
 		}
 		return nil, err
 	}
@@ -87,14 +86,14 @@ func (db *MongoAccountDatabase) GetAccountByUsernameAndPassword(username, passwo
 	var acc pkgAccount.Account
 	if err := db.collection.FindOne(ctx, bson.M{"username": username}).Decode(&acc); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, account.ErrAccountNotFound
+			return nil, pkgAccount.ErrAccountNotFound
 		}
 		return nil, err
 	}
 
 	// compare the passwords
 	if err := db.pwHelper.ComparePassword(acc.Password, password); err != nil {
-		return nil, account.ErrInvalidCredentials
+		return nil, pkgAccount.ErrInvalidCredentials
 	}
 
 	return &acc, nil
@@ -109,14 +108,14 @@ func (db *MongoAccountDatabase) CreateAccount(username, password string) (*pkgAc
 	// hash the password before saving it to the database
 	hashedPassword, err := db.pwHelper.HashPassword(password)
 	if err != nil {
-		return nil, account.ErrAccountNotCreated
+		return nil, pkgAccount.ErrAccountNotCreated
 	}
 
 	// check if the account already exists
 	if count, err := db.collection.CountDocuments(ctx, bson.M{"username": username}); err != nil {
 		return nil, err
 	} else if count > 0 {
-		return nil, account.ErrAccountAlreadyExists
+		return nil, pkgAccount.ErrAccountAlreadyExists
 	}
 
 	// create the account
@@ -141,13 +140,13 @@ func (db *MongoAccountDatabase) DeleteAccount(id string) error {
 	// delete the account
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return account.ErrInvalidID
+		return pkgAccount.ErrInvalidID
 	}
 
 	if result, err := db.collection.DeleteOne(ctx, bson.M{"_id": oid}); err != nil {
 		return err
 	} else if result.DeletedCount == 0 {
-		return account.ErrAccountNotDeleted
+		return pkgAccount.ErrAccountNotDeleted
 	}
 
 	return nil

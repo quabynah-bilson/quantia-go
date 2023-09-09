@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/quabynah-bilson/quantia/adapters/account"
 	internalAccount "github.com/quabynah-bilson/quantia/internal/account"
 	"github.com/quabynah-bilson/quantia/migrations"
 	pkgAccount "github.com/quabynah-bilson/quantia/pkg/account"
@@ -16,7 +15,7 @@ import (
 type AccountPostgresDatabase struct {
 	conn     *pgx.Conn
 	pwHelper pkgAccount.PasswordHelper
-	account.Database
+	pkgAccount.Database
 }
 
 // WithPostgresAccountDatabase creates a new RepositoryConfiguration for PostgreSQL.
@@ -65,14 +64,14 @@ func (d *AccountPostgresDatabase) CreateAccount(username, password string) (*pkg
 	// check if the account already exists by username
 	var userAccount pkgAccount.Account
 	if err := d.conn.QueryRow(ctx, "SELECT id, username, password FROM accounts WHERE username = $1", username).Scan(&userAccount.ID, &userAccount.Username, &userAccount.Password); err == nil {
-		return nil, account.ErrAccountAlreadyExists
+		return nil, pkgAccount.ErrAccountAlreadyExists
 	}
 
 	// hash the password
 	hashedPassword, err := d.pwHelper.HashPassword(password)
 	if err != nil {
 		log.Printf("error hashing password: %v", err)
-		return nil, account.ErrAccountNotCreated
+		return nil, pkgAccount.ErrAccountNotCreated
 	}
 
 	// create a new account
@@ -80,19 +79,19 @@ func (d *AccountPostgresDatabase) CreateAccount(username, password string) (*pkg
 	tag, err := d.conn.Exec(ctx, "INSERT INTO accounts (id, username, password) VALUES ($1, $2, $3)", id, username, hashedPassword)
 	if err != nil {
 		log.Printf("error creating account: %v", err)
-		return nil, account.ErrAccountNotCreated
+		return nil, pkgAccount.ErrAccountNotCreated
 	}
 
 	// check if the account was created
 	if tag.RowsAffected() == 0 {
-		return nil, account.ErrAccountNotCreated
+		return nil, pkgAccount.ErrAccountNotCreated
 	}
 
 	// get the account
 	getAccountResult, err := d.GetAccount(id.String())
 	if err != nil {
 		log.Printf("error getting account: %v", err)
-		return nil, account.ErrAccountNotFound
+		return nil, pkgAccount.ErrAccountNotFound
 	}
 
 	return getAccountResult, nil
@@ -114,7 +113,7 @@ func (d *AccountPostgresDatabase) GetAccount(id string) (*pkgAccount.Account, er
 	var userAccount pkgAccount.Account
 	if err := d.conn.QueryRow(ctx, "SELECT id, username, password FROM accounts WHERE id = $1", parsedID).Scan(&userAccount.ID, &userAccount.Username, &userAccount.Password); err != nil {
 		log.Printf("error getting account: %v", err)
-		return nil, account.ErrAccountNotFound
+		return nil, pkgAccount.ErrAccountNotFound
 	}
 
 	return &userAccount, nil
@@ -130,13 +129,13 @@ func (d *AccountPostgresDatabase) GetAccountByUsernameAndPassword(username, pass
 	var userAccount pkgAccount.Account
 	if err := d.conn.QueryRow(ctx, "SELECT id, username, password FROM accounts WHERE username = $1", username).Scan(&userAccount.ID, &userAccount.Username, &userAccount.Password); err != nil {
 		log.Printf("error getting account: %v", err)
-		return nil, account.ErrAccountNotFound
+		return nil, pkgAccount.ErrAccountNotFound
 	}
 
 	// compare the password with the hashed password
 	if err := d.pwHelper.ComparePassword(userAccount.Password, password); err != nil {
 		log.Printf("error comparing password: %v", err)
-		return nil, account.ErrInvalidCredentials
+		return nil, pkgAccount.ErrInvalidCredentials
 	}
 
 	return &userAccount, nil
@@ -158,12 +157,12 @@ func (d *AccountPostgresDatabase) DeleteAccount(id string) error {
 	tag, err := d.conn.Exec(ctx, "DELETE FROM accounts WHERE id = $1", parsedID)
 	if err != nil {
 		log.Printf("error deleting account: %v", err)
-		return account.ErrAccountNotDeleted
+		return pkgAccount.ErrAccountNotDeleted
 	}
 
 	// check if the account was deleted
 	if tag.RowsAffected() == 0 {
-		return account.ErrAccountNotDeleted
+		return pkgAccount.ErrAccountNotDeleted
 	}
 
 	return nil
@@ -172,7 +171,7 @@ func (d *AccountPostgresDatabase) DeleteAccount(id string) error {
 func parseID(id string) (uuid.UUID, error) {
 	parsed, err := uuid.Parse(id)
 	if err != nil {
-		return [16]byte{}, account.ErrInvalidID
+		return [16]byte{}, pkgAccount.ErrInvalidID
 	}
 
 	return parsed, nil

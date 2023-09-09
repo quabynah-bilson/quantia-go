@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/joho/godotenv"
-	"github.com/quabynah-bilson/quantia/scripts"
+	"github.com/quabynah-bilson/quantia/interfaces/http"
 	"log"
 )
 
@@ -14,5 +14,5 @@ func main() {
 	}
 
 	// Start the auth server
-	scripts.StartAuthServer()
+	http.StartAuthServer()
 }

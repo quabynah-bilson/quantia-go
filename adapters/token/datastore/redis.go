@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
-	"github.com/quabynah-bilson/quantia/adapters/token"
 	internal "github.com/quabynah-bilson/quantia/internal/token"
 	pkg "github.com/quabynah-bilson/quantia/pkg/token"
 	"log"
@@ -15,7 +14,7 @@ import (
 type RedisTokenDatabase struct {
 	client    *redis.Client
 	generator pkg.TokenizerHelper
-	token.Database
+	pkg.Database
 }
 
 // WithRedisTokenDatabase creates a new RedisTokenDatabase.
@@ -67,7 +66,7 @@ func (db *RedisTokenDatabase) CreateToken(id string) (string, error) {
 
 	if err := db.client.HSet(ctx, id, fromSession(&session)).Err(); err != nil {
 		log.Printf("error creating token: %v", err)
-		return "", token.ErrTokenNotCreated
+		return "", pkg.ErrTokenNotCreated
 	}
 
 	return session.Token, nil
@@ -82,12 +81,12 @@ func (db *RedisTokenDatabase) ValidateToken(authToken, accountID string) error {
 	storedToken, err := db.client.HGet(ctx, accountID, "token").Result()
 	if err != nil {
 		log.Printf("error validating token: %v", err)
-		return token.ErrInvalidToken
+		return pkg.ErrInvalidToken
 	}
 
 	// check if the token is valid
 	if storedToken != authToken {
-		return token.ErrInvalidToken
+		return pkg.ErrInvalidToken
 	}
 
 	return db.generator.ValidateToken(storedToken)
@@ -102,7 +101,7 @@ func (db *RedisTokenDatabase) DeleteToken(accountID string) error {
 	// delete the token
 	if err := db.client.HDel(ctx, accountID, "token", "account_id", "id").Err(); err != nil {
 		log.Printf("error deleting token: %v", err)
-		return token.ErrCannotDeleteToken
+		return pkg.ErrCannotDeleteToken
 	}
 
 	return nil

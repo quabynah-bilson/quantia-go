@@ -3,11 +3,17 @@ package token
 import "errors"
 
 var (
+	// ErrInvalidClaim is the error returned when an invalid claim is provided.
+	ErrInvalidClaim = errors.New("invalid claim")
+
+	// ErrInvalidToken is the error returned when an invalid token is provided.
+	ErrInvalidToken = errors.New("invalid token")
+
+	// ErrTokenExpired is the error returned when an expired token is provided.
+	ErrTokenExpired = errors.New("token expired")
+
 	// ErrTokenNotCreated is returned when the token could not be created.
 	ErrTokenNotCreated = errors.New("token not created")
-
-	// ErrInvalidToken is returned when the token is invalid.
-	ErrInvalidToken = errors.New("invalid token")
 
 	// ErrCannotDeleteToken is returned when the token could not be deleted.
 	ErrCannotDeleteToken = errors.New("cannot delete token")

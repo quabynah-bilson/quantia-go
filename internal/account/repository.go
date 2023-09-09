@@ -1,7 +1,6 @@
 package account
 
 import (
-	adapterAccount "github.com/quabynah-bilson/quantia/adapters/account"
 	"github.com/quabynah-bilson/quantia/pkg/account"
 )
 
@@ -10,8 +9,8 @@ type RepositoryConfiguration func(*Repository) error
 
 // Repository is the account repository implementation
 type Repository struct {
+	DB account.Database
 	account.Repository
-	DB adapterAccount.Database
 }
 
 // NewRepository creates a new account repository

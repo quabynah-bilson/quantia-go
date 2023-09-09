@@ -19,7 +19,19 @@ jobs:
       - run: go install golang.org/x/lint/golint
       - run: golint ./...
         name: Run Tests
-      - run: go test -v ./...
+      - run: go test -v -cover ./...
+        name: Code Coverage Summary Report
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: coverage/**/coverage.cobertura.xml
+          badge: true
+          fail_below_min: true
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: true
+          indicators: true
+          output: both
+          thresholds: '60 80'
 
   deploy-to-dockerhub:
     runs-on: ubuntu-latest

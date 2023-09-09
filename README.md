@@ -1,8 +1,12 @@
 # Quantia: Banking Backend
 
+[![codecov](https://codecov.io/gh/quabynah-bilson/quantia-go/branch/dev/graph/badge.svg?token=codecov:token:${{ secrets.CODECOV_TOKEN }})]
+(https://codecov.io/gh/quabynah-bilson/quantia-go)
+
 ## Introduction
 
-Quantia is a robust backend architecture for a banking application, designed to automate and streamline banking operations. It is developed using the Go programming language, specifically version 1.21, along with Go SDK 1.21.1.
+Quantia is a robust backend architecture for a banking application, designed to automate and streamline banking operations. It is developed using the
+Go programming language, specifically version 1.21, along with Go SDK 1.21.1.
 
 ## Features
 
@@ -30,22 +34,22 @@ To successfully build and run Quantia, you need:
 
 To set up Quantia on your local machine, follow these steps:
 
-1.  Clone the repo to your local machine
-    ```bash
-    git clone https://github.com/yourusername/quantia.git
-    ```
-2.  Move to the project directory
-    ```bash
-    cd quantia
-    ```
-3.  Install the necessary Go packages
-    ```bash
-    go get
-    ```
-4.  Start the server
-    ```bash
-    go run .
-    ```
+1. Clone the repo to your local machine
+   ```bash
+   git clone https://github.com/yourusername/quantia.git
+   ```
+2. Move to the project directory
+   ```bash
+   cd quantia
+   ```
+3. Install the necessary Go packages
+   ```bash
+   go get
+   ```
+4. Start the server
+   ```bash
+   go run .
+   ```
 
 ## API endpoints
 
@@ -53,7 +57,8 @@ Please refer to `docs/api.docs.md` for detailed information about the provided e
 
 ## Contribution
 
-We warmly welcome any and all contributions. If you would like to contribute to the project, please fork the repository, make your changes, and submit a pull request.
+We warmly welcome any and all contributions. If you would like to contribute to the project, please fork the repository, make your changes, and submit
+a pull request.
 
 ## Licence
 
@@ -61,5 +66,5 @@ Quantia is licensed to the end-user under the terms of the MIT license.
 
 ## Feedback
 
-Please do not hesitate to provide feedback or [report an issue](https://github.com/quabynah-bilson/quantia-go/issues). We also welcome feature 
+Please do not hesitate to provide feedback or [report an issue](https://github.com/quabynah-bilson/quantia-go/issues). We also welcome feature
 requests.

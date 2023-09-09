@@ -4,21 +4,22 @@ import (
 	"context"
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
-	"github.com/quabynah-bilson/quantia/adapters"
 	"github.com/quabynah-bilson/quantia/adapters/token"
-	pkgToken "github.com/quabynah-bilson/quantia/pkg/token"
+	internal "github.com/quabynah-bilson/quantia/internal/token"
+	pkg "github.com/quabynah-bilson/quantia/pkg/token"
 	"log"
 	"time"
 )
 
 // RedisTokenDatabase is the implementation of the TokenDatabase interface for Redis.
 type RedisTokenDatabase struct {
+	client    *redis.Client
+	generator pkg.TokenizerHelper
 	token.Database
-	client *redis.Client
 }
 
-// WithRedisTokenDatabase configures the database to use Redis.
-func WithRedisTokenDatabase(connectionString string) adapters.DatabaseConfig {
+// WithRedisTokenDatabase creates a new RedisTokenDatabase.
+func WithRedisTokenDatabase(connectionString string) internal.RepositoryConfiguration {
 	// set a timeout of 5 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -35,8 +36,12 @@ func WithRedisTokenDatabase(connectionString string) adapters.DatabaseConfig {
 		return nil
 	}
 
-	return func(database *adapters.DatabaseAdapter) error {
-		database.TokenDB = &RedisTokenDatabase{client: client}
+	return func(r *internal.Repository) error {
+		r.DB = &RedisTokenDatabase{
+			client:    client,
+			generator: internal.NewPasetoTokenizerHelper(),
+		}
+
 		return nil
 	}
 }
@@ -47,11 +52,17 @@ func (db *RedisTokenDatabase) CreateToken(id string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	// generate a new token
+	generatedToken, err := db.generator.GenerateToken(id)
+	if err != nil {
+		return "", err
+	}
+
 	// create a new token for the given id
-	session := pkgToken.Session{
+	session := pkg.Session{
 		ID:        uuid.NewString(),
 		AccountID: id,
-		Token:     uuid.NewString(), // @todo generate a random token
+		Token:     generatedToken,
 	}
 
 	if err := db.client.HSet(ctx, id, fromSession(&session)).Err(); err != nil {
@@ -79,9 +90,7 @@ func (db *RedisTokenDatabase) ValidateToken(authToken, accountID string) error {
 		return token.ErrInvalidToken
 	}
 
-	// @todo -> check if the token has expired
-
-	return nil
+	return db.generator.ValidateToken(storedToken)
 }
 
 // DeleteToken invalidates the given token.
@@ -100,7 +109,7 @@ func (db *RedisTokenDatabase) DeleteToken(accountID string) error {
 }
 
 // fromSession converts the given session to a JSON string.
-func fromSession(session *pkgToken.Session) map[string]interface{} {
+func fromSession(session *pkg.Session) map[string]interface{} {
 	return map[string]interface{}{
 		"id":         session.ID,
 		"account_id": session.AccountID,

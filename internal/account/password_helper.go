@@ -11,8 +11,8 @@ type PasswordHelper struct {
 	account.PasswordHelper
 }
 
-// NewPasswordHelper creates a new password helper
-func NewPasswordHelper() account.PasswordHelper {
+// NewBcryptPasswordHelper creates a new password helper that uses bcrypt
+func NewBcryptPasswordHelper() account.PasswordHelper {
 	return &PasswordHelper{}
 }
 

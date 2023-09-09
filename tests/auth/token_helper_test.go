@@ -82,36 +82,3 @@ func TestMockTokenizerHelper_ValidateToken(t *testing.T) {
 		})
 	}
 }
-
-func TestMockTokenizerHelper_InvalidateToken(t *testing.T) {
-	type testCase struct {
-		name           string
-		suggestedToken string
-		expectedError  error
-	}
-
-	testCases := []testCase{
-		{
-			name:           "invalidate generated token",
-			suggestedToken: mocks.SuggestedToken,
-		},
-		{
-			name:           "invalidate non-generated token",
-			suggestedToken: "nonGeneratedToken",
-			expectedError:  token.ErrTokenRevoked,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			helper := mocks.NewMockTokenizerHelper()
-			if _, err := helper.GenerateToken("claim123"); err != nil {
-				t.Errorf("Unexpected error: %v", err)
-			}
-
-			if err := helper.InvalidateToken(tc.suggestedToken); !errors.Is(err, tc.expectedError) {
-				t.Errorf("Unexpected error: %v", err)
-			}
-		})
-	}
-}

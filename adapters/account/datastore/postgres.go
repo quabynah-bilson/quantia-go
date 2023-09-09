@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/quabynah-bilson/quantia/adapters"
 	"github.com/quabynah-bilson/quantia/adapters/account"
+	internalAccount "github.com/quabynah-bilson/quantia/internal/account"
 	"github.com/quabynah-bilson/quantia/migrations"
 	pkgAccount "github.com/quabynah-bilson/quantia/pkg/account"
 	"log"
@@ -19,8 +19,8 @@ type AccountPostgresDatabase struct {
 	account.Database
 }
 
-// WithPostgresAccountDatabase is the function that returns a DatabaseConfig function that sets the account database to PostgreSQL.
-func WithPostgresAccountDatabase(connectionString string, pwHelper pkgAccount.PasswordHelper) adapters.DatabaseConfig {
+// WithPostgresAccountDatabase creates a new RepositoryConfiguration for PostgreSQL.
+func WithPostgresAccountDatabase(connectionString string, pwHelper pkgAccount.PasswordHelper) internalAccount.RepositoryConfiguration {
 	// set a timeout of 5 seconds
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -46,8 +46,12 @@ func WithPostgresAccountDatabase(connectionString string, pwHelper pkgAccount.Pa
 		return nil
 	}
 
-	return func(a *adapters.DatabaseAdapter) error {
-		a.AccountDB = &AccountPostgresDatabase{conn: conn, pwHelper: pwHelper}
+	return func(r *internalAccount.Repository) error {
+		r.DB = &AccountPostgresDatabase{
+			conn:     conn,
+			pwHelper: pwHelper,
+		}
+
 		return nil
 	}
 }

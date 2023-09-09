@@ -1,6 +1,6 @@
 # Quantia: Banking Backend
 
-[![codecov](https://codecov.io/gh/quabynah-bilson/quantia-go/branch/dev/graph/badge.svg?token=codecov:token:${{ secrets.CODECOV_TOKEN }})]
+[![codecov](https://codecov.io/gh/quabynah-bilson/quantia-go/branch/dev/graph/badge.svg?token=codecov:token:95c2f5c4-6d08-4e7e-8a8e-a05cc20600e2)]
 (https://codecov.io/gh/quabynah-bilson/quantia-go)
 
 ## Introduction

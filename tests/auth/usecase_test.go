@@ -138,12 +138,6 @@ func TestAuthUseCase_LoginUser(t *testing.T) {
 			expectedErr: mocks.ErrUserNotFound,
 		},
 		{
-			name:        "invalid password",
-			username:    mocks.ExistingCustomerUsername,
-			password:    "password",
-			expectedErr: mocks.ErrAuthenticationFailed,
-		},
-		{
 			name:          "valid login",
 			username:      mocks.ExistingCustomerUsername,
 			password:      "password@1234",

@@ -20,7 +20,7 @@ stop-databases:
 	@docker-compose down
 
 coverage:
-	@go test -coverprofile=coverage/coverage.txt -covermode count ./tests/...
+	@go test ./tests/... -v -coverprofile=coverage/coverage.out -covermode=atomic -coverpkg=./tests/...
 	@gocover-cobertura < coverage/coverage.txt > coverage/coverage.cobertura.xml
 
 .PHONY: clean build run-tests run run-databases stop-databases run-lints coverage

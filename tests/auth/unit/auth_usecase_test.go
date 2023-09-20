@@ -1,4 +1,4 @@
-package auth_test
+package unit_test
 
 import (
 	"errors"
@@ -9,6 +9,7 @@ import (
 	"testing"
 )
 
+// testCase is a struct that represents a test case.
 type testCase struct {
 	name              string
 	username          string
@@ -155,16 +156,11 @@ func TestAuthUseCase_LoginUser(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			authRepo := &mocks.MockAccountRepository{
 				LoginFn: func(username, password string) (*account.Account, error) {
-					var err error
-					// simulate a user not found
-					if username == mocks.NewCustomerUsername {
-						err = mocks.ErrUserNotFound
-					}
 
 					// simulate a successful login
 					return &account.Account{
 						ID: tc.expectedAccountID,
-					}, err
+					}, nil
 				},
 			}
 

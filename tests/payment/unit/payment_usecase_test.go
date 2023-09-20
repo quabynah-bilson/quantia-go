@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/quabynah-bilson/quantia/pkg"
 	"github.com/quabynah-bilson/quantia/pkg/payment"
-	"github.com/quabynah-bilson/quantia/tests/auth/mocks"
+	"github.com/quabynah-bilson/quantia/tests/payment/mocks"
 	"log"
 	"testing"
 )
@@ -24,21 +24,14 @@ func TestPaymentUseCase_Pay(t *testing.T) {
 		{
 			name:                  "invalid amount",
 			amount:                -1,
-			url:                   "https://quantia.com",
+			url:                   "https://quantia-webhooks.com",
 			expectedTransactionID: "",
 			expectedErr:           pkg.ErrInvalidAmount,
 		},
 		{
-			name:                  "invalid URL",
-			amount:                100,
-			url:                   "quantia.com",
-			expectedTransactionID: "",
-			expectedErr:           pkg.ErrInvalidURL,
-		},
-		{
 			name:                  "valid payment",
 			amount:                100,
-			url:                   "https://quantia.com",
+			url:                   "https://quantia-webhooks.com",
 			expectedTransactionID: "123e4567-e89b-12d3-a456-426614174000",
 			expectedErr:           nil,
 		},
@@ -84,7 +77,7 @@ func TestPaymentUseCase_SubscribeToWebhook(t *testing.T) {
 		},
 		{
 			name:        "valid URL",
-			url:         "https://quantia.com",
+			url:         "https://quantia-webhooks.com",
 			expectedErr: nil,
 		},
 	}
@@ -101,8 +94,8 @@ func TestPaymentUseCase_SubscribeToWebhook(t *testing.T) {
 			paymentUseCase := pkg.NewPaymentUseCase(paymentRepo)
 
 			// Act
-			queueChan := make(chan *payment.WebhookPayload)
-			err := paymentUseCase.SubscribeToWebhook(tc.url, queueChan)
+			queueChan := make(chan *payment.WebhookPayload, 10)
+			err := paymentUseCase.Subscribe(tc.url, queueChan)
 
 			// Listen to the queue channel
 			go func() {

@@ -1,5 +1,7 @@
 package payment
 
+import "time"
+
 // TransactionStatus is the type that represents a transaction status
 type TransactionStatus string
 
@@ -26,8 +28,17 @@ type WebhookPayload struct {
 	ID     string            `json:"id"`
 	Status TransactionStatus `json:"status"`
 	Url    string            `json:"url"`
+	Amount float32           `json:"amount"`
 	Data   struct {
 		TransactionID string `json:"transaction_id"`
 		Date          string `json:"created_at"`
 	} `json:"data"`
+}
+
+// Payload is the entity that represents a webhook payload
+type Payload struct {
+	ID      string    `json:"id"`
+	Event   string    `json:"event"`
+	Date    time.Time `json:"date"`
+	Payment string    `json:"payment"`
 }

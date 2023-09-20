@@ -34,17 +34,13 @@ func (uc *PaymentUseCase) MakePayment(amount float32, url string) (*payment.Tran
 		return nil, err
 	}
 
-	if err := validateURL(url); err != nil {
-		log.Printf("error validating URL: %v", err)
-		return nil, err
-	}
-
 	return uc.paymentRepo.Pay(amount, url)
 }
 
-// SubscribeToWebhook subscribes to a webhook.
-func (uc *PaymentUseCase) SubscribeToWebhook(url string, queue chan *payment.WebhookPayload) error {
+// Subscribe subscribes to a webhook.
+func (uc *PaymentUseCase) Subscribe(url string, queue chan *payment.WebhookPayload) error {
 	if err := validateURL(url); err != nil {
+		log.Printf("error validating URL: %v", err)
 		return err
 	}
 

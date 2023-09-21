@@ -13,6 +13,12 @@ type MakePaymentResponse struct {
 	Transaction *payment.Transaction `json:"transaction"`
 }
 
+// WebhookResponse represents the JSON structure returned for webhook subscription requests.
+type WebhookResponse struct {
+	Success     bool                 `json:"success"`
+	Transaction *payment.Transaction `json:"transaction"`
+}
+
 // SubscribeToWebhookRequest represents the JSON structure expected for webhook subscription requests.
 type SubscribeToWebhookRequest struct {
 	Url string `json:"url"`

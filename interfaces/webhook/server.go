@@ -8,7 +8,8 @@ import (
 	"os"
 )
 
-func StartPaymentWorker() {
+// StartWebhookWorker starts the webhook worker (to process webhooks)
+func StartWebhookWorker() {
 	// create a new payment repository (with a database configuration)
 	paymentRepo := payment.NewRepository(datastore.WithRedisPaymentDatabase(os.Getenv("REDIS_URI")))
 

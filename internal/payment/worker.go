@@ -8,13 +8,16 @@ import (
 
 // ProcessWebhooks is a worker that processes webhooks
 func ProcessWebhooks(repo *Repository, webhookQueue chan *pkg.WebhookPayload) {
+	log.Println("starting webhook worker")
 	for payload := range webhookQueue {
 		go func(p *pkg.WebhookPayload) {
 			backoffTime, maxBackoffTime := time.Second, time.Minute
 			retries, maxRetries := 0, 5
 			for {
+				log.Printf("processing transaction %s", p.ID)
 				// process the webhook payload
 				if _, err := repo.Pay(p.Amount, p.Url); err == nil {
+					log.Printf("successfully processed transaction %s", p.ID)
 					break // success
 				}
 
@@ -34,6 +37,7 @@ func ProcessWebhooks(repo *Repository, webhookQueue chan *pkg.WebhookPayload) {
 				if backoffTime > maxBackoffTime {
 					backoffTime = maxBackoffTime
 				}
+				log.Printf("backoff time for transaction %s is now %s", p.ID, backoffTime)
 			}
 		}(payload)
 	}

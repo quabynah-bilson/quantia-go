@@ -17,6 +17,6 @@ func main() {
 	// Start the auth server
 	go http.StartAuthServer()
 
-	// Start the payment worker
-	webhook.StartPaymentWorker()
+	// Start the webhook worker
+	webhook.StartWebhookWorker()
 }

@@ -25,14 +25,17 @@ type Transaction struct {
 
 // WebhookPayload is the entity that represents a webhook payload
 type WebhookPayload struct {
-	ID     string            `json:"id"`
-	Status TransactionStatus `json:"status"`
-	Url    string            `json:"url"`
-	Amount float32           `json:"amount"`
-	Data   struct {
-		TransactionID string `json:"transaction_id"`
-		Date          string `json:"created_at"`
-	} `json:"data"`
+	ID     string             `json:"id"`
+	Status TransactionStatus  `json:"status"`
+	Url    string             `json:"url"`
+	Amount float32            `json:"amount"`
+	Data   WebhookPayloadData `json:"data"`
+}
+
+// WebhookPayloadData is the entity that represents a webhook payload data
+type WebhookPayloadData struct {
+	TransactionID string `json:"transaction_id"`
+	Date          string `json:"created_at"`
 }
 
 // Payload is the entity that represents a webhook payload

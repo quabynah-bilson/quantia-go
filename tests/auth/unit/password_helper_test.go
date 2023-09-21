@@ -1,4 +1,4 @@
-package auth_test
+package unit_test
 
 import (
 	"errors"

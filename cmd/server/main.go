@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/joho/godotenv"
 	"github.com/quabynah-bilson/quantia/interfaces/http"
+	"github.com/quabynah-bilson/quantia/interfaces/webhook"
 	"log"
 )
 
@@ -14,5 +15,8 @@ func main() {
 	}
 
 	// Start the auth server
-	http.StartAuthServer()
+	go http.StartAuthServer()
+
+	// Start the webhook worker
+	webhook.StartWebhookWorker()
 }

@@ -17,7 +17,7 @@ jobs:
           go-version: "^1.20.1" # The Go version to download (if necessary) and use.
       - run: go version
         name: Run coverage
-      - run: go test ./tests/... -v -coverprofile=coverage.out -covermode=atomic -coverpkg=./tests/...
+      - run: go test ./src/api/tests/... -v -coverprofile=coverage.out -covermode=atomic -coverpkg=./src/api/tests/...
         name: Upload coverage to Codecov
       - uses: codecov/codecov-action@v3
         env:

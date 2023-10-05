@@ -1,6 +1,6 @@
 FROM golang:1.21-rc-alpine3.18 AS builder
 WORKDIR /app
-COPY . .
+COPY ./src/api/ .
 RUN go build -o /app/bin/ ./cmd/server/...
 
 FROM alpine:latest

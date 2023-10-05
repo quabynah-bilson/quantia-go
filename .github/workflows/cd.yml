@@ -20,7 +20,7 @@ jobs:
       - uses: docker/build-push-action@v2
         # use docker file located in the scripts folder
         with:
-          context: src/scripts
+          context: ./src/scripts
           file: Dockerfile
           push: true
           username: ${{ secrets.DOCKER_USERNAME }}

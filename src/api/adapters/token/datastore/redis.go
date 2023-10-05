@@ -64,7 +64,7 @@ func (db *RedisTokenDatabase) CreateToken(id string) (string, error) {
 		Token:     generatedToken,
 	}
 
-	if err := db.client.HSet(ctx, id, fromSession(&session)).Err(); err != nil {
+	if err = db.client.HSet(ctx, id, fromSession(&session)).Err(); err != nil {
 		log.Printf("error creating token: %v", err)
 		return "", pkg.ErrTokenNotCreated
 	}

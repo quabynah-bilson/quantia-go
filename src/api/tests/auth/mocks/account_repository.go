@@ -3,6 +3,7 @@ package mocks
 import (
 	"errors"
 	"github.com/quabynah-bilson/quantia/pkg/account"
+	pkg "github.com/quabynah-bilson/quantia/pkg/payment"
 )
 
 var (
@@ -29,6 +30,7 @@ var (
 type MockAccountRepository struct {
 	LoginFn    func(username, password string) (*account.Account, error)
 	RegisterFn func(username, password string) (*account.Account, error)
+	pkg.Repository
 }
 
 // Login mocks the login method.
